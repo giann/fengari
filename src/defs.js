@@ -327,6 +327,16 @@ const LUA_OPEQ = 0;
 const LUA_OPLT = 1;
 const LUA_OPLE = 2;
 
+const LUA_GCSTOP       = 0;
+const LUA_GCRESTART    = 1;
+const LUA_GCCOLLECT    = 2;
+const LUA_GCCOUNT      = 3;
+const LUA_GCCOUNTB     = 4;
+const LUA_GCSTEP       = 5;
+const LUA_GCSETPAUSE   = 6;
+const LUA_GCSETSTEPMUL = 7;
+const LUA_GCISRUNNING  = 9;
+
 const LUA_MINSTACK = 20;
 
 const { LUAI_MAXSTACK } = require('./luaconf.js');
@@ -379,6 +389,16 @@ const LUA_MASKRET   = (1 << LUA_HOOKRET);
 const LUA_MASKLINE  = (1 << LUA_HOOKLINE);
 const LUA_MASKCOUNT = (1 << LUA_HOOKCOUNT);
 
+
+module.exports.LUA_GCCOLLECT           = LUA_GCCOLLECT;
+module.exports.LUA_GCCOUNT             = LUA_GCCOUNT;
+module.exports.LUA_GCCOUNTB            = LUA_GCCOUNTB;
+module.exports.LUA_GCISRUNNING         = LUA_GCISRUNNING;
+module.exports.LUA_GCRESTART           = LUA_GCRESTART;
+module.exports.LUA_GCSETPAUSE          = LUA_GCSETPAUSE;
+module.exports.LUA_GCSETSTEPMUL        = LUA_GCSETSTEPMUL;
+module.exports.LUA_GCSTEP              = LUA_GCSTEP;
+module.exports.LUA_GCSTOP              = LUA_GCSTOP;
 module.exports.LUA_HOOKCALL            = LUA_HOOKCALL;
 module.exports.LUA_HOOKCOUNT           = LUA_HOOKCOUNT;
 module.exports.LUA_HOOKLINE            = LUA_HOOKLINE;

@@ -66,7 +66,18 @@ In the browser `require` and `package.loadlib` try to find a file by making sync
 
 ### _Missing_ features
 
-- `lua_gc`/`collectgarbage`: Fengari relies on the JS garbage collector and does not implement its own.
+- `lua_gc`/`collectgarbage`: These functions only work when the JS garbage collector is available in the current environment:
+    - `LUA_GCCOLLECT`
+        - Supported in IE via `CollectGarbage`
+        - Supported in Opera < 15 via `opera.collect`
+        - Only supported in v8 engines (e.g. node.js, Chrome) if the process was started with `--expose-gc`
+    - `LUA_GCSTEP`
+        - Only supported in v8 engines (e.g. node.js, Chrome) if the process was started with `--expose-gc`
+    - `LUA_GCCOUNT`, `LUA_GCCOUNTB`
+        - Supported in WebKit browsers via `performance.memory`
+        - Supported in node.js via the [`v8` library](https://nodejs.org/api/v8.html)
+    - `LUA_GCSTOP`, `LUA_GCSETPAUSE`, `LUA_GCSETSTEPMUL`
+        - Supported in node.js via the [`v8` library](https://nodejs.org/api/v8.html)
 - The following functions are only available in Node:
     - The entire `io` lib
     - `os.remove`

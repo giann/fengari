@@ -1,6 +1,15 @@
 "use strict";
 
 const {
+    LUA_GCCOLLECT,
+    LUA_GCCOUNT,
+    LUA_GCCOUNTB,
+    LUA_GCISRUNNING,
+    LUA_GCRESTART,
+    LUA_GCSETPAUSE,
+    LUA_GCSETSTEPMUL,
+    LUA_GCSTEP,
+    LUA_GCSTOP,
     LUA_MULTRET,
     LUA_OPBNOT,
     LUA_OPEQ,
@@ -1101,8 +1110,91 @@ const lua_upvaluejoin = function(L, fidx1, n1, fidx2, n2) {
     ref1.f.upvals[ref1.i] = up2;
 };
 
-// This functions are only there for compatibility purposes
-const lua_gc = function () {};
+const lua_gc = function (L, what, data) {
+    switch (what) {
+        case LUA_GCSTOP: {
+            if (typeof process !== "undefined") {
+                /* we can't stop the v8 GC */
+                /* but we can slow it down to effectivly 0... */
+                require("v8").setFlagsFromString("--gc_interval="+0xFFFFFFFF);
+                return 0;
+            }
+            return -1;
+        }
+        case LUA_GCRESTART: {
+            return -1;
+        }
+        case LUA_GCCOLLECT: {
+            if (typeof gc === "function") {
+                /* v8 when started with --expose-gc */
+                /* global gc */
+                gc(false);
+            } else if (typeof CollectGarbage === "function") {
+                /* IE */
+                /* global CollectGarbage */
+                CollectGarbage();
+            } else if (typeof opera !== "undefined" && typeof opera.collect === "function") {
+                /* global opera */
+                opera.collect();
+            } else {
+                return -1;
+            }
+            return 0;
+        }
+        case LUA_GCCOUNT: {
+            /* GC values are expressed in Kbytes: #bytes/2^10 */
+            let v;
+            if (typeof process !== "undefined") {
+                v = require("v8").getHeapStatistics().used_heap_size;
+            } else if (typeof performance !== "undefined" && typeof performance.memory === "object") {
+                v = performance.memory.usedJSHeapSize;
+            } else {
+                return -1;
+            }
+            return v >> 10;
+        }
+        case LUA_GCCOUNTB: {
+            let v;
+            if (typeof process !== "undefined") {
+                v = require("v8").getHeapStatistics().used_heap_size;
+            } else if (typeof performance !== "undefined" && typeof performance.memory === "object") {
+                v = performance.memory.usedJSHeapSize;
+            } else {
+                return -1;
+            }
+            return v & 0x3ff;
+        }
+        case LUA_GCSTEP: {
+            if (typeof gc === "function") {
+                /* global gc */
+                gc(true);
+                return 0;
+            }
+            return -1;
+        }
+        case LUA_GCSETPAUSE: {
+            if (typeof process !== "undefined") {
+                require("v8").setFlagsFromString("--gc_interval="+data);
+                /* we can't get the current gc_interval */
+                return 0;
+            }
+            return -1;
+        }
+        case LUA_GCSETSTEPMUL: {
+            if (typeof process !== "undefined") {
+                require("v8").setFlagsFromString("--max_old_space_size="+data);
+                return 0;
+            }
+            return -1;
+        }
+        case LUA_GCISRUNNING: {
+            /* we can't stop the JS GC */
+            /* we can't get the current gc_interval */
+            return 1;
+        }
+        default: return -1;  /* invalid option */
+    }
+};
 
 const lua_getallocf = function () {
     console.warn("lua_getallocf is not available");
